@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thannapat Boonsinpuripat</title>
+  <meta name="description" content="เว็บโปรไฟล์ส่วนตัวของ Thannapat Boonsinpuripat — ผลงาน ทักษะ และประสบการณ์">
+
+  <!-- ไอคอนแท็บ (emoji) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌈</text></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- แถบความคืบหน้าการเลื่อน -->
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <!-- พื้นหลัง: หยดสี + แสงตามเมาส์ -->
+  <div class="blobs" aria-hidden="true">
+    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+  </div>
+  <div class="spotlight" id="spotlight" aria-hidden="true"></div>
+
+  <!-- แถบเมนูด้านบน -->
+  <header class="nav">
+    <div class="nav-in">
+      <a class="brand" href="#top" id="brand">•</a>
+      <nav class="nav-links" id="nav-links"></nav>
+      <button class="icon-btn" id="lang-btn" type="button" title="เปลี่ยนภาษา / Switch language">EN</button>
+      <button class="icon-btn" id="theme-btn" type="button" title="สลับโหมดสว่าง–มืด / Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ส่วนหัว -->
+    <section class="hero wrap">
+      <div class="hero-in">
+        <div class="avatar-wrap" id="avatar-wrap">
+          <div class="avatar-ring">
+            <div class="avatar" id="avatar"></div>
+          </div>
+          <span class="badge-year" id="badge-year"></span>
+        </div>
+        <div>
+          <span class="eyebrow"><i class="dot"></i><span id="available"></span></span>
+          <h1><span class="grad-text" id="hero-name"></span></h1>
+          <p class="tagline typed-wrap"><span id="typed"></span><i class="caret"></i></p>
+          <p class="bio" id="hero-bio"></p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#work"    id="cta-work"></a>
+            <a class="btn btn-ghost"   href="#contact" id="cta-contact"></a>
+          </div>
+          <div class="stats" id="stats"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- แถบคำวิ่ง -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track" id="marquee"></div>
+    </div>
+
+    <!-- ผลงาน -->
+    <section id="work" class="wrap reveal">
+      <div class="sec-head">
+        <div class="sec-kicker" id="k-work"></div>
+        <h2 id="h-work"></h2>
+      </div>
+      <div class="cards" id="work-grid"></div>
+    </section>
+
+    <!-- ทักษะ -->
+    <section id="skills" class="wrap reveal">
+      <div class="sec-head">
+        <div class="sec-kicker" id="k-skills"></div>
+        <h2 id="h-skills"></h2>
+      </div>
+      <div class="skill-groups" id="skill-groups"></div>
+    </section>
+
+    <!-- ประสบการณ์ -->
+    <section id="experience" class="wrap reveal">
+      <div class="sec-head">
+        <div class="sec-kicker" id="k-exp"></div>
+        <h2 id="h-exp"></h2>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+  </main>
+
+  <!-- ท้ายเว็บ / ติดต่อ -->
+  <footer class="footer" id="contact">
+    <div class="wrap">
+      <div class="socials" id="socials"></div>
+      <p class="copyright"><span id="footer-note"></span></p>
+      <p class="copyright" id="copyright"></p>
+    </div>
+  </footer>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
