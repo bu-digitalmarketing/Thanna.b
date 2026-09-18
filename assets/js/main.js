@@ -299,7 +299,19 @@ function pointerEffects() {
 
   const spot = document.getElementById("spotlight");
   const ring = document.querySelector(".avatar-ring");
+  const copy = document.getElementById("hero-copy");
   let pending = false, px = 0, py = 0;
+
+  /* หมุนกี่องศา เมื่อเมาส์อยู่ห่างจากจุดกึ่งกลางของ el
+     ต้อง clamp ไว้ ไม่งั้นตอน el เลื่อนพ้นจอ ระยะห่างจะโตจนเอียงเกิน 45° แล้วดูพัง */
+  const clamp = (v, max) => Math.max(-max, Math.min(max, v));
+  const tiltFrom = (el, max) => {
+    const r = el.getBoundingClientRect();
+    return {
+      ry: clamp(((px - (r.left + r.width / 2)) / innerWidth) * max * 2, max),
+      rx: clamp((-(py - (r.top + r.height / 2)) / innerHeight) * max * 2, max)
+    };
+  };
 
   addEventListener("pointermove", (e) => {
     px = e.clientX; py = e.clientY;
@@ -310,13 +322,56 @@ function pointerEffects() {
       spot.style.setProperty("--mx", px + "px");
       spot.style.setProperty("--my", py + "px");
 
-      const r = ring.getBoundingClientRect();
-      const dx = (px - (r.left + r.width / 2)) / innerWidth;
-      const dy = (py - (r.top + r.height / 2)) / innerHeight;
-      ring.style.setProperty("--ary", (dx * 18).toFixed(2) + "deg");
-      ring.style.setProperty("--arx", (-dy * 18).toFixed(2) + "deg");
+      const a = tiltFrom(ring, 20);
+      ring.style.setProperty("--ary", a.ry.toFixed(2) + "deg");
+      ring.style.setProperty("--arx", a.rx.toFixed(2) + "deg");
+
+      /* ข้อความในส่วนหัวเอียงตามเมาส์ — แต่ละชั้นลึกไม่เท่ากันจึงเลื่อนไม่เท่ากัน */
+      const h = tiltFrom(copy, 13);
+      copy.style.setProperty("--hry", h.ry.toFixed(2) + "deg");
+      copy.style.setProperty("--hrx", h.rx.toFixed(2) + "deg");
     });
   }, { passive: true });
+
+  /* การ์ดทักษะเอียงตามเมาส์ของตัวเอง */
+  document.addEventListener("pointerover", (e) => {
+    const c = e.target.closest && e.target.closest(".skill-card");
+    if (!c || c.dataset.tilt) return;
+    c.dataset.tilt = "1";
+    c.addEventListener("pointermove", (ev) => {
+      const r = c.getBoundingClientRect();
+      c.style.setProperty("--sry", (((ev.clientX - r.left) / r.width - .5) * 13).toFixed(2) + "deg");
+      c.style.setProperty("--srx", ((.5 - (ev.clientY - r.top) / r.height) * 13).toFixed(2) + "deg");
+    });
+    c.addEventListener("pointerleave", () => {
+      c.style.setProperty("--sry", "0deg");
+      c.style.setProperty("--srx", "0deg");
+    });
+  });
+}
+
+/* 9. หัวข้อแต่ละ section เอียงตามตำแหน่งที่เลื่อนมาถึง */
+function scroll3D() {
+  if (REDUCED) return;
+  const heads = [...document.querySelectorAll(".sec-head")];
+  if (!heads.length) return;
+  let ticking = false;
+
+  const update = () => {
+    ticking = false;
+    heads.forEach((h) => {
+      const r = h.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > innerHeight) return;
+      /* p = 1 เมื่ออยู่ล่างสุดของจอ → 0 เมื่อขึ้นมาถึงกลางจอ */
+      const p = Math.max(0, Math.min(1, (r.top - innerHeight * .45) / (innerHeight * .55)));
+      h.style.setProperty("--secrx", (p * 22).toFixed(2) + "deg");
+    });
+  };
+
+  addEventListener("scroll", () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  update();
 }
 
 /* 8. การ์ดผลงาน: เอียง 3 มิติ + จุดแสงตามเมาส์ */
@@ -393,3 +448,4 @@ document.getElementById("lang-btn").addEventListener("click", () => {
 renderAll();
 scrollEffects();
 pointerEffects();
+scroll3D();

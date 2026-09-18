@@ -214,7 +214,8 @@ section { padding-block: 56px; }
 
 .card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
+  border-radius: var(--radius);
+  /* ไม่ใส่ overflow: hidden เพราะจะทำให้ลูก ๆ ที่ยกตัวด้วย translateZ แบนราบ */
   box-shadow: var(--shadow); text-decoration: none;
   display: flex; flex-direction: column;
   transition: transform .2s, box-shadow .25s;
@@ -427,7 +428,9 @@ section { padding-block: 56px; }
 :root[data-theme="dark"] .card::after { background: radial-gradient(260px circle at var(--cx,50%) var(--cy,50%), rgba(255,255,255,.09), transparent 65%); }
 
 /* emoji ในการ์ดเด้งตอนชี้ */
-.card-media { overflow: hidden; }
+/* ตัดขอบเฉพาะการ์ดที่มีรูป — การ์ด emoji ต้องไม่ตัด ไม่งั้น emoji ลอยออกมาไม่ได้ */
+.card-media { border-radius: var(--radius) var(--radius) 0 0; }
+.card-media:has(img) { overflow: hidden; }
 .card-media > .emoji {
   display: block; transition: transform .35s cubic-bezier(.34, 1.56, .64, 1);
 }
@@ -508,4 +511,198 @@ section { padding-block: 56px; }
   .tl-item, .stagger, .social { opacity: 1; transform: none; }
   .caret { display: none; }
   .sec-head h2::after { width: 62%; transition: none; }
+}
+
+/* ============================================================
+   ส่วนเพิ่มเติม: อนิเมชัน 3 มิติ (3D)
+   หลักการ: พ่อใส่ perspective → ลูกใส่ preserve-3d → หลานยกตัวด้วย translateZ
+   ============================================================ */
+
+/* ---------- 0. ลูกบาศก์ 3 มิติลอยเป็นพื้นหลัง ---------- */
+.scene3d {
+  position: fixed; inset: 0; z-index: -1;
+  perspective: 900px; pointer-events: none; overflow: hidden;
+}
+.cube {
+  position: absolute; width: 90px; height: 90px;
+  transform-style: preserve-3d;
+  animation: tumble 26s linear infinite;
+  opacity: .30;
+}
+.cube .face {
+  position: absolute; inset: 0;
+  border: 2px solid currentColor; border-radius: 10px;
+  background: currentColor;
+  opacity: .16;
+}
+.cube .f1 { transform: translateZ(45px); }
+.cube .f2 { transform: rotateY(180deg) translateZ(45px); }
+.cube .f3 { transform: rotateY(90deg)  translateZ(45px); }
+.cube .f4 { transform: rotateY(-90deg) translateZ(45px); }
+.cube .f5 { transform: rotateX(90deg)  translateZ(45px); }
+.cube .f6 { transform: rotateX(-90deg) translateZ(45px); }
+
+.cube.c1 { top: 14%; left: 7%;  color: var(--c1); animation-duration: 24s; }
+.cube.c2 { top: 62%; right: 9%; color: var(--c4); animation-duration: 31s; animation-direction: reverse; }
+.cube.c3 { top: 38%; left: 46%; color: var(--c3); animation-duration: 38s; width: 60px; height: 60px; }
+.cube.c3 .face { --s: 30px; }
+.cube.c3 .f1 { transform: translateZ(30px); }
+.cube.c3 .f2 { transform: rotateY(180deg) translateZ(30px); }
+.cube.c3 .f3 { transform: rotateY(90deg)  translateZ(30px); }
+.cube.c3 .f4 { transform: rotateY(-90deg) translateZ(30px); }
+.cube.c3 .f5 { transform: rotateX(90deg)  translateZ(30px); }
+.cube.c3 .f6 { transform: rotateX(-90deg) translateZ(30px); }
+
+@keyframes tumble {
+  0%   { transform: rotateX(0deg)   rotateY(0deg)   translateY(0); }
+  50%  { transform: rotateX(180deg) rotateY(180deg) translateY(-40px); }
+  100% { transform: rotateX(360deg) rotateY(360deg) translateY(0); }
+}
+
+/* ---------- 1. ส่วนหัวเป็นฉาก 3 มิติ ---------- */
+.hero-in { perspective: 1300px; perspective-origin: 50% 40%; }
+
+.hero-copy {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--hrx, 0deg)) rotateY(var(--hry, 0deg));
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+}
+/* ยกแต่ละชิ้นคนละระดับความลึก → ขยับเมาส์แล้วเลื่อนไม่เท่ากัน เกิดมิติ */
+.hero-copy > .eyebrow      { transform: translateZ(34px); }
+.hero-copy > h1            { transform: translateZ(70px); }
+.hero-copy > .tagline      { transform: translateZ(52px); }
+.hero-copy > .bio          { transform: translateZ(26px); }
+.hero-copy > .hero-actions { transform: translateZ(58px); }
+.hero-copy > .stats        { transform: translateZ(38px); }
+.hero-copy > *             { transform-style: preserve-3d; }
+
+/* ชื่อแบบตัวอักษรนูน — ใช้ drop-shadow ซ้อนกัน เพราะตัวอักษรไล่สีใส่ text-shadow ไม่ได้ */
+.grad-text {
+  filter:
+    drop-shadow(1px 1px 0 rgba(108, 92, 231, .30))
+    drop-shadow(2px 2px 0 rgba(108, 92, 231, .24))
+    drop-shadow(3px 3px 0 rgba(108, 92, 231, .18))
+    drop-shadow(4px 4px 0 rgba(108, 92, 231, .12))
+    drop-shadow(5px 5px 0 rgba(108, 92, 231, .07))
+    drop-shadow(7px 9px 12px rgba(50, 20, 90, .26));
+}
+
+/* รูปโปรไฟล์: วงแหวนเป็นทรง 3 มิติจริง ยกขึ้นจากพื้น */
+.avatar-wrap { perspective: 1000px; transform-style: preserve-3d; }
+.avatar-ring { transform-style: preserve-3d; }
+.avatar      { transform: translateZ(26px); }
+.badge-year  { transform: translateX(-50%) translateZ(54px); }
+@keyframes bob {
+  50% { transform: translateX(-50%) translateZ(54px) translateY(-8px); }
+}
+
+/* ---------- 2. การ์ดผลงาน: มีความลึกจริง ---------- */
+.card {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(var(--tz, 0px));
+}
+.card:hover { --tz: 26px; --ty: 0px; }
+.card-media, .card-body { transform-style: preserve-3d; }
+
+.card-media > .emoji,
+.card-body h3, .card-body p, .tags, .card-link {
+  transition: transform .35s cubic-bezier(.34, 1.56, .64, 1);
+}
+.card:hover .card-media > .emoji { transform: translateZ(70px) scale(1.18) rotate(-8deg); }
+.card:hover .card-body h3  { transform: translateZ(48px); }
+.card:hover .card-body p   { transform: translateZ(26px); }
+.card:hover .tags          { transform: translateZ(36px); }
+.card:hover .card-link     { transform: translateZ(42px); }
+
+/* ---------- 3. ทุกอย่างพลิกเข้ามาแบบ 3 มิติตอนเลื่อนถึง ---------- */
+.cards, .skill-groups, .timeline, .socials { perspective: 1400px; }
+
+.stagger {
+  opacity: 0;
+  transform: rotateX(-26deg) translateY(34px) translateZ(-90px);
+  transform-origin: 50% 100%;
+}
+.stagger.shown {
+  animation: rise3d .85s cubic-bezier(.22, 1, .36, 1) forwards;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes rise3d {
+  60%  { opacity: 1; transform: rotateX(6deg) translateY(-4px) translateZ(18px); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* ---------- 4. การ์ดทักษะ: เอียงตามเมาส์ + แถบยกลอย ---------- */
+.skill-card {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--srx, 0deg)) rotateY(var(--sry, 0deg));
+  transition: transform .2s ease-out, box-shadow .25s;
+}
+.skill-card h3, .skill-row { transform-style: preserve-3d; transition: transform .3s; }
+.skill-card:hover h3 { transform: translateZ(40px); }
+.skill-card:hover .skill-row { transform: translateZ(20px); }
+.skill-card:hover .bar { transform: translateZ(12px); }
+.bar { transform-style: preserve-3d; transition: transform .3s; }
+
+/* ---------- 5. ไทม์ไลน์: แต่ละรายการแกว่งเข้ามาเหมือนบานประตู ---------- */
+.tl-item {
+  transform-origin: left center;
+  transform: rotateY(-55deg) translateX(-20px);
+  opacity: 0;
+}
+.tl-item.shown { transform: none; opacity: 1; transition: transform .8s cubic-bezier(.22, 1, .36, 1), opacity .6s; }
+.tl-item:hover { transform: translateZ(24px) rotateY(-4deg); transition: transform .3s; }
+
+/* ---------- 6. แถบคำวิ่งโค้งเหมือนทรงกระบอก ---------- */
+.marquee { perspective: 600px; }
+.marquee-track { transform: rotateX(14deg); transform-style: preserve-3d; }
+.marquee span { transform: translateZ(22px); }
+
+/* ---------- 7. ปุ่มกดแล้วยุบลงไปในหน้าจอ ---------- */
+.hero-actions { perspective: 700px; }
+.btn { transform-style: preserve-3d; }
+.btn:hover  { transform: translateY(-3px) translateZ(22px) rotateX(-8deg); }
+.btn:active { transform: translateY(0)    translateZ(-8px) rotateX(6deg); }
+
+.icon-btn { transform-style: preserve-3d; }
+.icon-btn:hover  { transform: translateY(-2px) rotateX(-14deg); }
+.icon-btn:active { transform: scale(.94) rotateX(10deg); }
+
+/* ---------- 8. ปุ่มโซเชียลพลิกตัวตอนชี้ ---------- */
+.social { transform-style: preserve-3d; }
+.footer.shown .social:hover {
+  transform: translateY(-4px) translateZ(26px) rotateY(-12deg);
+  transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* ---------- 9. ตัวเลขเด่นยกลอยตอนชี้ ---------- */
+.stats { perspective: 900px; }
+.stat  { transform-style: preserve-3d; transition: transform .28s, box-shadow .28s; }
+.stat:hover { transform: translateZ(30px) rotateX(-10deg); box-shadow: var(--shadow-lg); }
+
+/* ---------- 10. ทั้ง section เอียงตามตำแหน่งการเลื่อน ---------- */
+main > section { perspective: 1800px; }
+.sec-head {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--secrx, 0deg));
+  transform-origin: 50% 100%;
+}
+
+/* ---------- ปิด 3D ทั้งหมดถ้าผู้ใช้ตั้งค่าลดการเคลื่อนไหว ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .scene3d { display: none; }
+  .hero-copy, .hero-copy > *, .card, .skill-card, .tl-item,
+  .marquee-track, .marquee span, .avatar, .badge-year, .sec-head {
+    transform: none !important;
+  }
+  .badge-year { transform: translateX(-50%) !important; }
+  .stagger { opacity: 1; transform: none; }
+  .grad-text { filter: none; }
+}
+
+/* ---------- จอเล็ก: ลดความแรงของ 3D ลง (นิ้วไม่มี hover) ---------- */
+@media (max-width: 760px) {
+  .cube.c3 { display: none; }
+  .hero-copy > h1            { transform: translateZ(36px); }
+  .hero-copy > .hero-actions { transform: translateZ(28px); }
+  .stagger { transform: rotateX(-16deg) translateY(26px) translateZ(-50px); }
 }
